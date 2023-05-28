@@ -1,0 +1,104 @@
+# code: language=ansible
+---
+# Hardens SSH for Debian 11.x Systems
+- name: Create Staging File for SSH Changes
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/ssh/sshd_config
+    dest: /etc/ssh/sshd_config.ansible
+    mode: '0644'
+    owner: root
+    group: root
+  tags: ssh
+
+- name: Set SSH KexAlgorithms
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config.ansible
+    state: present
+    line: 'KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256'
+  tags: ssh
+
+- name: Set SSH Ciphers
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config.ansible
+    state: present
+    line: 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr'
+  tags: ssh
+
+- name: Set SSH MACs
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config.ansible
+    state: present
+    line: 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com'
+  tags: ssh
+
+- name: Set log sftp level file access
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config.ansible
+    regexp: '^Subsystem\s+sftp\s+/usr/lib/openssh/sftp-server'
+    line: 'Subsystem sftp /usr/lib/openssh/sftp-server -f AUTHPRIV -l INFO'
+  tags: ssh
+
+- name: Disable SSH root login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config.ansible
+    regexp: '^#PermitRootLogin'
+    line: 'PermitRootLogin no'
+  tags: ssh
+
+- name: Disable SSH password authentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config.ansible
+    regexp: '^#PasswordAuthentication yes'
+    line: 'PasswordAuthentication no'
+  tags: ssh
+
+- name: Set SSH AuthenticationMethods
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config.ansible
+    state: present
+    line: 'AuthenticationMethods publickey'
+  tags: ssh
+
+- name: Determine if sshd_config was changed
+  ansible.builtin.stat:
+    path: /etc/ssh/sshd_config
+    checksum_algorithm: sha256
+  register: sshd_config_orig
+  tags: ssh
+
+- name: Determine if sshd_config was changed
+  ansible.builtin.stat:
+    path: /etc/ssh/sshd_config.ansible
+    checksum_algorithm: sha256
+  register: sshd_config_new
+  tags: ssh
+
+- name: Backup SSH Configuration
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/ssh/sshd_config
+    dest: /etc/ssh/.sshd_config.{{ ansible_date_time.epoch }}
+    mode: '0644'
+    owner: root
+    group: root
+  when: sshd_config_new.stat.checksum != sshd_config_orig.stat.checksum
+  tags: ssh
+
+- name: Move Updated Configuration
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/ssh/sshd_config.ansible
+    dest: /etc/ssh/sshd_config
+    mode: '0644'
+    owner: root
+    group: root
+    validate: sshd -t -f %s
+  when: sshd_config_new.stat.checksum != sshd_config_orig.stat.checksum
+  notify: Restart SSH
+  tags: ssh
+
+- name: Remove Temporary File
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.ansible
+    state: absent

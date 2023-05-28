@@ -1,0 +1,30 @@
+# code: language=ansible
+---
+# handlers file for debian-ntp
+- name: Stop NTP
+  ansible.builtin.service:
+    name: ntp
+    state: stopped
+  tags: ntp
+
+- name: Enable and Unmask NTP
+  ansible.builtin.systemd:
+    name: ntp
+    enabled: true
+    masked: false
+  tags: ntp
+
+- name: Ensure NTP Stats Directory
+  ansible.builtin.file:
+    path: /var/log/ntpstats/
+    state: directory
+    owner: ntp
+    group: ntp
+    mode: "0755"
+  tags: ntp
+
+- name: Restart NTP
+  ansible.builtin.service:
+    name: ntp
+    state: restarted
+  tags: ntp

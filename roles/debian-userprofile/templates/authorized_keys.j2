@@ -1,0 +1,3 @@
+{% for key in user.authorized_keys %}
+{{ key.type }} {{ key.fingerprint }} {{ key.name }}
+{% endfor %}

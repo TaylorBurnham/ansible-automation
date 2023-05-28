@@ -1,0 +1,11 @@
+# code: language=ansible
+---
+# tasks file for debian-hardening
+- name: Apply SSH Hardening
+  ansible.builtin.include_tasks: ssh.yaml
+
+- name: Install libpam-tmpdir
+  ansible.builtin.apt:
+    pkg: libpam-tmpdir
+    update_cache: true
+    state: present

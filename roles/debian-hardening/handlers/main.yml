@@ -1,0 +1,8 @@
+# code: language=ansible
+---
+# handlers file for debian-hardening
+- name: Restart SSH
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+  tags: ssh

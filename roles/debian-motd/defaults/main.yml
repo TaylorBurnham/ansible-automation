@@ -1,0 +1,11 @@
+# code: language=yaml
+---
+# Vars for the motd creation/config
+motd_files:
+ - 10-hostname
+ - 20-sysinfo
+ - 35-diskspace
+ - 40-services
+ - 60-docker
+ - 90-urgent-updates
+ - 99-everything-else

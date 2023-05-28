@@ -1,0 +1,15 @@
+# code: language=ansible
+---
+- name: Clone Lynis Repository
+  ansible.builtin.git:
+    repo: "{{ lynis_repo }}"
+    dest: "{{ lynis_home }}"
+    version: "{{ lynis_version }}"
+
+- name: Ensure Ownership of Lynis Home
+  ansible.builtin.file:
+    path: "{{ lynis_home }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"

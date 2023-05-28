@@ -1,0 +1,4 @@
+# code: language=ansible
+---
+- name: Apply MOTD Configuration
+  ansible.builtin.include_tasks: motd.yaml

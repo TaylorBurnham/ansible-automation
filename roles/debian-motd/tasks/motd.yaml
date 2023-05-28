@@ -1,0 +1,40 @@
+# code: language=ansible
+---
+- name: Install Dependent Packages
+  become: true
+  ansible.builtin.apt:
+    name:
+      - hddtemp
+      - lolcat
+      - figlet
+    state: present
+
+- name: Update Existing motd
+  ansible.builtin.copy:
+    src: base_motd
+    dest: /etc/motd
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Wipe MOTD Directory
+  ansible.builtin.file:
+    state: absent
+    path: /etc/update-motd.d/
+
+- name: Re-Create
+  ansible.builtin.file:
+    state: directory
+    path: /etc/update-motd.d/
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Copy MOTD Files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /etc/update-motd.d/
+    owner: "root"
+    group: "root"
+    mode: "a+x"
+  loop: "{{ motd_files }}"

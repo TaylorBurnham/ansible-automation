@@ -1,0 +1,22 @@
+# code: language=ansible
+---
+# tasks file for debian-init
+- name: Ensure user
+  ansible.builtin.user:
+    name: "{{ user.username }}"
+    comment: "{{ user.fullname }}"
+    shell: "/bin/bash"
+- name: Ensure .ssh directory exists
+  ansible.builtin.file:
+    path: "/home/{{ user.username }}/.ssh"
+    state: directory
+    owner: "{{ user.username }}"
+    group: "{{ user.username }}"
+    mode: '0755'
+- name: Ensure authorized_keys are configured
+  ansible.builtin.template:
+    src: authorized_keys.j2
+    dest: "/home/{{ user.username }}/.ssh/authorized_keys"
+    owner: "{{ user.username }}"
+    group: "{{ user.username }}"
+    mode: '0644'

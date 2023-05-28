@@ -1,0 +1,21 @@
+# code: language=ansible
+---
+# This installs and configures NTP.
+- name: Install ntp
+  ansible.builtin.apt:
+    name: ntp
+    state: present
+  notify:
+    - Stop NTP
+    - Enable and Unmask NTP
+    - Ensure NTP Stats Directory
+  tags: ntp
+
+- name: Configure ntp file
+  ansible.builtin.template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+    mode: "0644"
+  tags: ntp
+  notify:
+    - Restart NTP

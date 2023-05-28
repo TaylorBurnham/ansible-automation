@@ -1,0 +1,28 @@
+# code: language=ansible
+---
+# tasks file for debian-init
+- name: Update OS
+  ansible.builtin.apt:
+    upgrade: "dist"
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install Base Packages
+  ansible.builtin.apt:
+    pkg: "{{ packages.all_systems }}"
+    update_cache: true
+    state: present
+
+- name: Set Default Editor to vim
+  community.general.alternatives:
+    name: editor
+    path: /usr/bin/vim
+    state: selected
+
+- name: Check Reboot Status
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+    get_checksum: false
+  register: reboot
+  changed_when: reboot.stat.exists
+  notify: Perform Reboot

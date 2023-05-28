@@ -1,0 +1,5 @@
+# code: language=yaml
+---
+lynis_repo: https://github.com/CISOfy/lynis
+lynis_home: "/opt/lynis"
+lynis_version: "3.0.8"
