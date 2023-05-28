@@ -1,0 +1,16 @@
+# code: language=yaml
+---
+all:
+  hosts:
+    localhost:
+      # For local development / linting
+      vars:
+        ansible_host: localhost
+        ansible_connection: local
+        ansible_python_interpreter: /home/taylor/.virtualenvs/ansible/bin/python3
+    sys01:
+  children:
+    # k3s nodes
+    k3s:
+      hosts:
+        k3s-node[01:03]:

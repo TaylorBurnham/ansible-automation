@@ -1,0 +1,40 @@
+# code: language=yaml
+---
+user:
+  username: taylor
+  fullname: "Taylor Burnham"
+  authorized_keys:
+    - name: taylor@burnham.io
+      type: ssh-ed25519
+      fingerprint: AAAAC3NzaC1lZDI1NTE5AAAAICTv5ilm1bwMtXZvRpovB57OHDDOWncyMlBHdKF200OH
+ntp:
+  servers:
+    - 192.168.1.1
+packages:
+  # Packages to install across all systems regardless of type.
+  all_systems:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - dnsutils
+    - fail2ban
+    - git
+    - git-lfs
+    - gnupg
+    - htop
+    - jq
+    - lsb-release
+    - mtr-tiny
+    - ncdu
+    - net-tools
+    - python3-dev
+    - python3-pip
+    - python3-setuptools
+    - python3-venv
+    - python3-wheel
+    - rsync
+    - screen
+    - software-properties-common
+    - sudo
+    - ufw
+    - vim

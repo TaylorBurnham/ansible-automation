@@ -1,0 +1,4 @@
+exclude_paths:
+  - vault.yml
+  - vault.yaml
+  - vaults/*
