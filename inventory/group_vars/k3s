@@ -1,2 +1,8 @@
 # code: language=yaml
 ---
+additional_packages:
+  # System Specific Packages
+  - qemu-kvm
+  - libvirt-clients
+  - libvirt-daemon-system
+  - virtinst

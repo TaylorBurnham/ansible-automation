@@ -9,9 +9,16 @@
 
 - name: Install Base Packages
   ansible.builtin.apt:
-    pkg: "{{ packages.all_systems }}"
+    pkg: "{{ packages }}"
     update_cache: true
     state: present
+
+- name: Install Additional Packages
+  ansible.builtin.apt:
+    pkg: "{{ additional_packages }}"
+    update_cache: true
+    state: present
+  when: additional_packages | length > 0
 
 - name: Set Default Editor to vim
   community.general.alternatives:
