@@ -5,7 +5,24 @@
   ansible.builtin.user:
     name: "{{ user.username }}"
     comment: "{{ user.fullname }}"
-    shell: "/bin/bash"
+- name: Try to set ZSH as Default Shell
+  block:
+    - name: Check for ZSH
+      ansible.builtin.command: zsh --version
+      register: zsh_check
+      check_mode: false
+      changed_when: false
+      failed_when: zsh_check.rc != 0 and zsh_check.rc != 127
+    - name: Set User's Shell to ZSH
+      ansible.builtin.user:
+        name: "{{ user.username }}"
+        shell: /bin/zsh
+  rescue:
+    - name: Set User's Shell to Bash
+      ansible.builtin.user:
+        name: "{{ user.username }}"
+        shell: /bin/bash
+
 - name: Ensure .ssh directory exists
   ansible.builtin.file:
     path: "/home/{{ user.username }}/.ssh"

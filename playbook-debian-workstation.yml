@@ -1,0 +1,14 @@
+# code: language=ansible
+---
+- name: Apply Common Configurations for All Nodes
+  hosts:
+    - yidhra
+    - xexanoth
+  become: true
+  roles:
+    - debian-init
+    - debian-ntp
+    - debian-userprofile
+    - debian-lynis
+    - debian-hardening
+    - debian-motd

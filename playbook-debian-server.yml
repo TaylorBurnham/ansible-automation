@@ -1,0 +1,18 @@
+# code: language=ansible
+---
+- name: Apply Common Configurations for All Nodes
+  hosts:
+    - vulthoom
+    - overseer
+    # Groups
+    - k3s
+    - pis
+  become: true
+  roles:
+    - debian-init
+    - debian-ntp
+    - debian-userprofile
+    - debian-lynis
+    - debian-hardening
+    - debian-motd
+    # - debian-libvirt
