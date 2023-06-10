@@ -2,3 +2,4 @@ vault.yaml
 inventory/hosts
 .vscode/
 _vars/
+inventory/host_vars/vn0*

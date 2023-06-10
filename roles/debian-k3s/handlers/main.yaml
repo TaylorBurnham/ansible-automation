@@ -1,0 +1,6 @@
+# code: language=ansible
+---
+# handlers file for debian-k3s
+- name: Perform Reboot
+  ansible.builtin.reboot:
+    reboot_command: shutdown -r 5

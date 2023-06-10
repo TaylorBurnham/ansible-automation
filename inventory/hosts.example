@@ -14,3 +14,39 @@ all:
     k3s:
       hosts:
         k3s-node[01:03]:
+      vars:
+        nfs_mountpoints:
+          - remote_path: "/volume1/Lab/{{ ansible_hostname }}"
+            server: nfs.server.name
+            local_path: /media/nfs/system
+            opts: "rw,sync,hard"
+          - remote_path: "/volume1/Lab/common"
+            server: nfs.server.name
+            local_path: /media/nfs/common
+            opts: "rw,sync,hard"
+    k3s_vm:
+      hosts:
+        vn01-master:
+        vn[01:03]-worker[01:03]:
+      vars:
+        # TODO - Change this hardcoding nonsense
+        master_node: vn01-master
+        master_ip: 10.0.20.101
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+        network_interfaces:
+          defaults:
+            gateway: 10.0.20.1
+            netmask: 255.255.255.0
+            nameservers:
+              - 10.0.20.1
+          ipv4:
+            vn01-master: 10.0.20.101
+            vn01-worker01: 10.0.20.111
+            vn01-worker02: 10.0.20.112
+            vn01-worker03: 10.0.20.113
+            vn02-worker01: 10.0.20.121
+            vn02-worker02: 10.0.20.122
+            vn02-worker03: 10.0.20.123
+            vn03-worker01: 10.0.20.131
+            vn03-worker02: 10.0.20.132
+            vn03-worker03: 10.0.20.133

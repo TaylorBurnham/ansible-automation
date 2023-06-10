@@ -1,0 +1,13 @@
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto {{ ansible_default_ipv4.interface }}
+iface {{ ansible_default_ipv4.interface }} inet static
+  address {{ network_interfaces.ipv4[ansible_fqdn] }}
+  netmask {{ network_interfaces.defaults.netmask }}
+  gateway {{ network_interfaces.defaults.gateway }}
+{% for nameserver in network_interfaces.defaults.nameservers %}
+  dns-nameserver {{ nameserver }}
+{% endfor %}

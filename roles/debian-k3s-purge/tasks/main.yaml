@@ -1,0 +1,110 @@
+# code: language=ansible
+---
+# Role to remove k3s
+- name: Disable k3s Services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: true
+  failed_when: false
+  with_items:
+    - k3s-master
+    - k3s-node
+
+- name: Kill k3s/containderd
+  register: pkill_containerd_shim_runc
+  ansible.builtin.command: pkill -9 -f "k3s/data/[^/]+/bin/containerd-shim-runc"
+  changed_when: "pkill_containerd_shim_runc.rc == 0"
+  failed_when: false
+
+- name: Umount k3s filesystems
+  ansible.builtin.shell: set -o pipefail && cat /proc/mounts | awk '{ print $2}' | grep -E "^{{ mounted_fs }}"
+  register: get_mounted_filesystems
+  args:
+    executable: /bin/bash
+  failed_when: false
+  changed_when: get_mounted_filesystems.stdout | length > 0
+  check_mode: false
+  with_items:
+    - /run/k3s
+    - /var/lib/kubelet
+    - /run/netns
+    - /var/lib/rancher/k3s
+  loop_control:
+    loop_var: mounted_fs
+
+- name: Umount filesystem
+  ansible.posix.mount:
+    path: "{{ item }}"
+    state: unmounted
+  with_items:
+    "{{ get_mounted_filesystems.stdout_lines | reverse | list }}"
+  when: (
+    get_mounted_filesystems.stdout_lines is defined and
+    get_mounted_filesystems.stdout_lines | length > 0)
+
+- name: Remove service files, binaries and data
+  ansible.builtin.file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - /usr/local/bin/k3s
+    - "{{ systemd_dir }}/k3s-master.service"
+    - "{{ systemd_dir }}/k3s-node.service"
+    - /etc/rancher/k3s
+    - /var/lib/kubelet
+    - /var/lib/rancher/k3s
+
+- name: Systemd Daemon Reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Reboot the server # noqa no-changed-when
+  ansible.builtin.shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+
+- name: Wait for the reboot and reconnect
+  ansible.builtin.wait_for_connection:
+    connect_timeout: 10
+    sleep: 5
+    delay: 5
+    timeout: 300
+
+- name: Umount k3s filesystems
+  ansible.builtin.shell: set -o pipefail && cat /proc/mounts | awk '{ print $2}' | grep -E "^{{ mounted_fs }}"
+  register: get_mounted_filesystems
+  args:
+    executable: /bin/bash
+  failed_when: false
+  changed_when: get_mounted_filesystems.stdout | length > 0
+  check_mode: false
+  with_items:
+    - /run/k3s
+    - /var/lib/kubelet
+    - /run/netns
+    - /var/lib/rancher/k3s
+  loop_control:
+    loop_var: mounted_fs
+
+- name: Umount filesystem
+  ansible.posix.mount:
+    path: "{{ item }}"
+    state: unmounted
+  with_items:
+    "{{ get_mounted_filesystems.stdout_lines | reverse | list }}"
+  when: (
+    get_mounted_filesystems.stdout_lines is defined and
+    get_mounted_filesystems.stdout_lines | length > 0)
+
+- name: Remove service files, binaries and data
+  ansible.builtin.file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - /usr/local/bin/k3s
+    - "{{ systemd_dir }}/k3s-master.service"
+    - "{{ systemd_dir }}/k3s-node.service"
+    - /etc/rancher/k3s
+    - /var/lib/kubelet
+    - /var/lib/rancher/k3s

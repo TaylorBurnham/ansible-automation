@@ -1,0 +1,24 @@
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto {{ virtual_interfaces.default.name }}
+iface {{ virtual_interfaces.default.name }} inet {{ virtual_interfaces.default.type }}
+
+{% for interface in virtual_interfaces.additional %}
+auto {{ interface.name }}
+iface {{ interface.name }} inet {{ interface.type }}
+{% if interface.addr is defined %}
+  address {{ interface.addr }}
+  netmask {{ interface.netmask }}
+  gateway {{ interface.gateway }}
+{% endif %}
+{% if interface.bridge is defined %}
+  bridge-ports {{ interface.bridge.ports }}
+  bridge-stp {{ interface.bridge.stp }}
+  bridge-fd {{ interface.bridge.fd }}
+  bridge-maxwait {{ interface.bridge.maxwait }}
+
+{% endif %}
+{% endfor %}

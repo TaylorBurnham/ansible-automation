@@ -2,9 +2,7 @@
 ---
 - name: Apply Common Configurations for All Nodes
   hosts:
-    - vulthoom
-    - overseer
-    - pis
+    - k3s
   become: true
   roles:
     - debian-init
@@ -13,3 +11,4 @@
     - debian-lynis
     - debian-hardening
     - debian-motd
+    - debian-libvirt

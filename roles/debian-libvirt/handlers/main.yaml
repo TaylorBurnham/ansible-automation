@@ -1,0 +1,12 @@
+# code: language=ansible
+---
+# handlers file for debian-libvirt
+- name: Reload Sysctl # noqa no-changed-when
+  ansible.builtin.command: sysctl -p
+
+- name: Reload Network Stack # noqa no-changed-when
+  ansible.builtin.command: sudo service networking reload
+
+- name: Perform Reboot
+  ansible.builtin.reboot:
+    post_reboot_delay: 30

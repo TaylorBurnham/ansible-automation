@@ -2,6 +2,10 @@
 
 This is a collection of Ansible scripts that I use for my homelab. All of this comes without warranty and is to be used at your own risk.
 
+## Roles & References
+
+ - debian-k3s: Installs k3s across all nodes, with a single master. This was adapted from [k3s-ansible](https://github.com/k3s-io/k3s-ansible). Use `debian-k3s-purge` to remove the installation.
+
 ## Scripts and Fixes
 ### 1Password & ansible-lint
 

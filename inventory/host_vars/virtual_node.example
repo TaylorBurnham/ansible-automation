@@ -1,0 +1,31 @@
+# code: language=yaml
+---
+# For debian-libvirt
+virtual_interfaces:
+  default:
+    name: eno1
+    type: manual
+  additional:
+    - name: eno1.1020
+      desc: eno1-svc-vlan
+      type: manual
+    - name: br0
+      type: static
+      addr: 192.168.1.15
+      netmask: 255.255.255.0
+      gateway: 192.168.1.1
+      bridge:
+        ports: eno1
+        stp: "off"
+        fd: 0
+        maxwait: 0
+    - name: br1
+      type: static
+      addr: 10.0.20.15
+      netmask: 255.255.255.0
+      gateway: 10.0.0.1
+      bridge:
+        ports: eno1.1020
+        stp: "off"
+        fd: 0
+        maxwait: 0

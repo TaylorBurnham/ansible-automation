@@ -1,0 +1,94 @@
+# code: language=ansible
+---
+# tasks file for debian-libvirt
+- name: Install libvirt Packages
+  ansible.builtin.apt:
+    pkg: "{{ libvirt.packages }}"
+    update_cache: true
+    state: present
+
+- name: Add Default User to libvirt Groups
+  ansible.builtin.user:
+    name: "{{ user.username }}"
+    groups: libvirt,libvirt-qemu
+    append: true
+
+- name: Create libvirt Image Path
+  ansible.builtin.file:
+    state: directory
+    path: "{{ libvirt.image_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Sysctl Settings Loop
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  loop: "{{ sysctl_rules | dict2items }}"
+  notify: Reload Sysctl
+
+- name: Configure Network Interfaces
+  ansible.builtin.template:
+    src: interfaces.j2
+    dest: "/etc/network/interfaces"
+    owner: "root"
+    group: "root"
+    mode: '0644'
+  notify: Perform Reboot
+
+- name: NFS Handling
+  when: nfs_mountpoints is defined and nfs_mountpoints | length > 0
+  block:
+    - name: Create Local NFS Folder
+      ansible.builtin.file:
+        state: directory
+        path: "{{ item.local_path }}"
+        owner: "root"
+        group: "root"
+        mode: "0755"
+      loop: "{{ nfs_mountpoints }}"
+    - name: Add Mountpoint
+      ansible.posix.mount:
+        src: "{{ item.server }}:{{ item.remote_path }}"
+        path: "{{ item.local_path }}"
+        opts: "{{ item.opts }}"
+        state: mounted
+        fstype: nfs
+      loop: "{{ nfs_mountpoints }}"
+
+- name: Update libvirt.conf uri_default for root
+  ansible.builtin.lineinfile:
+    path: /etc/libvirt/libvirt.conf
+    regexp: '^#uri_default'
+    line: uri_default = "qemu:///system"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Create .config/libvirt for user
+  ansible.builtin.file:
+    path: "/home/{{ user.username }}/.config/libvirt/"
+    state: directory
+    recurse: true
+    owner: "{{ user.username }}"
+    group: "{{ user.username }}"
+    mode: "0755"
+
+- name: Create .config/libvirt/libvirt.conf for user
+  ansible.builtin.file:
+    path: "/home/{{ user.username }}/.config/libvirt/libvirt.conf"
+    state: touch
+    owner: "{{ user.username }}"
+    group: "{{ user.username }}"
+    mode: "0755"
+
+- name: Update libvirt.conf uri_default for user
+  ansible.builtin.lineinfile:
+    path: "/home/{{ user.username }}/.config/libvirt/libvirt.conf"
+    regexp: '^#uri_default'
+    line: uri_default = "qemu:///system"
+    owner: "{{ user.username }}"
+    group: "{{ user.username }}"
+    mode: "0644"

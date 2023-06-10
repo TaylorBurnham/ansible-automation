@@ -1,0 +1,7 @@
+# code: language=ansible
+---
+- name: Install k3s on Nodes
+  hosts: k3s_vm
+  become: true
+  roles:
+    - debian-k3s
